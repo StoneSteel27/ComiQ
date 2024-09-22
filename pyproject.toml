@@ -8,7 +8,7 @@ dynamic = ["version","dependencies"]
 authors = [
     {name = "MoltenSteel", email = "stoneSteel27@gmail.com"},
 ]
-description = "A Python module for comic text extraction and processing"
+description = "Comic-Focused Hybrid OCR Python Library"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
