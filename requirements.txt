@@ -1,0 +1,4 @@
+easyocr
+paddleocr
+paddlepaddle
+google-generativeai
