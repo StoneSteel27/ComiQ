@@ -7,3 +7,5 @@
 ![preview](https://github.com/StoneSteel27/ComiQ/blob/main/examples/images/styled-text--with-bg-text.png)
 ### 4. Comic Image, with styled, vertical oriented, and with background text.
 ![preview](https://github.com/StoneSteel27/ComiQ/blob/main/examples/images/styled-text--vertical-orientation--with-bg-text.png)
+### 5. Comic Image, with handwriting text, with background text.
+![preview](https://github.com/StoneSteel27/ComiQ/blob/main/examples/images/handwriting--with-bg-text.png)
