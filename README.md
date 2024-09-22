@@ -120,10 +120,6 @@ data = comiq.extract(image_path, ocr=["paddleocr", "easyocr"])
 | Strengths     | - Detects styled text<br>- Handles directional text<br>- Accurate bounding box positioning | - Higher true positive rate<br>- Better text quality |
 | Weaknesses    | - Lower text quality<br>- Higher false positive rate   | - Struggles with styled text<br>- Limited directional text support<br>- Less accurate positioning |
 
-## Examples
-
-(Add example images and code snippets demonstrating ComiQ in action)
-
 ## Contributing
 
 We welcome contributions to ComiQ! Please see our [Contributing Guide](CONTRIBUTING.md) for more information on how to get started.

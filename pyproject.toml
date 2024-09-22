@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "comiq"
 dynamic = ["version","dependencies"]
 authors = [
-    {name = "MoltenSteel", email = "stoneSteel27@gmail.com"},
+    {name = "MoltenSteel", email = "stonesteel27@gmail.com"},
 ]
 description = "Comic-Focused Hybrid OCR Python Library"
 readme = "README.md"
@@ -18,8 +18,8 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/StonSteel27/ComiQ"
-"Bug Tracker" = "https://github.com/StonSteel27/ComiQ/issues"
+"Homepage" = "https://github.com/StoneSteel27/ComiQ"
+"Bug Tracker" = "https://github.com/StoneSteel27/ComiQ/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
