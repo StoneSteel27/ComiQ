@@ -2,6 +2,8 @@
 
 ComiQ is an advanced Optical Character Recognition (OCR) library specifically designed for comics. It combines traditional OCR engines like EasyOCR and PaddleOCR with Google's Gemini Flash-1.5 model to provide accurate text detection and translation in comic images.
 
+For, Seeing the capabilities of ComiQ, Visit: [examples/ReadME.md](https://github.com/StoneSteel27/ComiQ/blob/c27f94f0b987ec3df0b60d1863872efd7bd84eef/examples/ReadME.md)
+
 ## Features
 
 - Hybrid OCR approach for improved accuracy
