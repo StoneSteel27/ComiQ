@@ -4,6 +4,7 @@ from typing import Dict, List
 import google.generativeai as genai
 from google.generativeai.types import HarmCategory, HarmBlockThreshold, GenerationConfig
 from .prompts import comic_prompt
+import re
 
 
 def process_with_ai(
@@ -13,7 +14,10 @@ def process_with_ai(
     model = configure_genai(api_key)
     prompt = comic_prompt.format(ocr_results)
     response = model.generate_content([image, prompt])
-    data = json.loads(response.text)
+    text = response.text
+    cleaned = re.sub(r"(?<=: )'|'(?=,)", '"', text)
+    cleaned = re.sub(r'(?<!\\)""', '"', cleaned)
+    data = json.loads(cleaned)
     return data
 
 

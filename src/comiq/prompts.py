@@ -55,7 +55,7 @@ Output Format:
       "cleaned_text": "The corrected and cleaned text",
       "type": "dialogue|thought|narration|sound_effect|background",
       "style": "normal|emphasized|angled|split",
-      "notes": "Justification for inclusion if background or sound effect, any significant corrections or uncertainties"
+      "notes": "Justification for inclusion if background or sound effect, any significant corrections or uncertainties|none"
     }},
     ...
   ]
@@ -71,4 +71,5 @@ Additional Guidelines:
 
 Analyze the image and OCR data thoroughly to produce accurate and contextually appropriate groupings with cleaned and corrected text that reflects the comic's essential narrative elements. Remember to include background text and sound effects only when they are crucial to the story or scene interpretation.
 If sound effects and background text are purely decorative or do not add meaningful information, exclude them from your groupings.
+Properly format the output json
 '''
