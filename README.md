@@ -26,6 +26,10 @@ pip install comiq
   - For headless environments or when GUI features are not required, ComiQ's default `opencv-python-headless` is sufficient.
   - If you need GUI features, you may need to uninstall `opencv-python-headless` and install `opencv-python` separately.
 
+**Handling Pytorch Exception**
+- Are you getting error: **OSError: [WinError 127] The specified procedure could not be found. Error loading "\torch\lib\shm.dll"**?
+  - Its an problem with latest version pytorch in Windows, Please install version `torch==2.2.1` and `torchvision==0.17.1`, here: [pytorch v2.2.1 and torchvision v0.17.1](https://pytorch.org/get-started/previous-versions/#v221)
+
 ## Quick Start
 
 ```python
