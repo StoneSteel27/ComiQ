@@ -10,7 +10,6 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 _API_KEY = None
 
-
 available_ocr = ["easyocr", "paddleocr"]
 
 
@@ -21,7 +20,7 @@ def set_api_key(api_key: str):
 
 
 def extract(
-    image: Union[str, "numpy.ndarray"], ocr: Union[str, List[str]] = "paddleocr"
+        image: Union[str, "numpy.ndarray"], ocr: Union[str, List[str]] = "paddleocr"
 ):
     """
     Extract text from the given image using specified OCR method(s) and process with AI.

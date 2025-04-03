@@ -51,8 +51,8 @@ Output Format:
       "panel_id": "1",
       "text_bubble_id": "1-1",
       "box_ids": ["1", "2", "3"],
-      "original_text": "The OCR output before cleaning",
-      "cleaned_text": "The corrected and cleaned text",
+      "original_text": """The OCR output before cleaning""",
+      "cleaned_text": """The corrected and cleaned text""",
       "type": "dialogue|thought|narration|sound_effect|background",
       "style": "normal|emphasized|angled|split",
       "notes": "Justification for inclusion if background or sound effect, any significant corrections or uncertainties|none"
