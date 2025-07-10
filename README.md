@@ -42,8 +42,9 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 ```
 
 **3. Install GPU-Enabled PaddlePaddle:**
+To ensure compatibility, install a version below 3.0:
 ```bash
-pip install paddlepaddle-gpu
+pip install "paddlepaddle-gpu<3.0"
 ```
 
 After installing the GPU versions, the OCR engines in ComiQ will automatically use them.

@@ -2,5 +2,5 @@ openai
 python-dotenv
 pydantic
 easyocr
-paddleocr
-paddlepaddle
+paddleocr<3.0
+paddlepaddle<3.0
