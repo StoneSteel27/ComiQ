@@ -1,145 +1,208 @@
 # ComiQ: Comic-Focused Hybrid OCR Library
 
-ComiQ is an advanced Optical Character Recognition (OCR) library specifically designed for comics. It combines traditional OCR engines like EasyOCR and PaddleOCR with Google's Gemini Flash-1.5 model to provide accurate text detection and translation in comic images.
+ComiQ is an advanced Optical Character Recognition (OCR) library specifically designed for comics. It combines traditional OCR engines with a powerful AI model to provide accurate text detection and grouping in comic images.
 
-For, observing the capabilities of ComiQ, Visit: [examples/ReadME.md](https://github.com/StoneSteel27/ComiQ/blob/c27f94f0b987ec3df0b60d1863872efd7bd84eef/examples/ReadME.md)
+For examples of ComiQ's capabilities, visit the [examples directory](examples/ReadME.md).
 
 ## Features
 
-- Hybrid OCR approach for improved accuracy
-- Specialized in detecting text within comic bubbles and panels
-- Integration with Google's Gemini Flash-1.5 model for enhanced performance
-- Support for multiple OCR engines
-- Easy-to-use Python interface
+- **Hybrid OCR:** Combines multiple OCR engines for improved accuracy and robustness.
+- **Extensible:** Register your own custom OCR engines.
+- **AI-Powered Grouping:** Uses an AI model to intelligently group detected text into coherent bubbles and captions.
+- **Configurable:** Easily configure the AI model, OCR engines, and other parameters.
+- **Flexible:** Supports both file paths and in-memory image arrays.
+- **Environment-Friendly:** Automatically loads your API key from environment variables.
 
 ## Installation
 
-Install ComiQ using pip:
+You can install ComiQ and its dependencies with a single pip command:
 
 ```bash
 pip install comiq
 ```
 
-**Important Notes:** 
-- For GPU-accelerated processing, please visit the [PyTorch website](https://pytorch.org/get-started/locally/) to install `torch` and `torchvision` with CUDA support.
-- ComiQ uses `opencv-python-headless` as a dependency. If your project requires the full `opencv-python` package, you may need to manage these dependencies carefully to avoid conflicts. Choose the appropriate version based on your project's needs:
-  - For headless environments or when GUI features are not required, ComiQ's default `opencv-python-headless` is sufficient.
-  - If you need GUI features, you may need to uninstall `opencv-python-headless` and install `opencv-python` separately.
+This will install the CPU-versions of the required OCR libraries. For GPU acceleration, please see the section below.
 
-**Handling Pytorch Exception**
-- Are you getting error: **OSError: [WinError 127] The specified procedure could not be found. Error loading "\torch\lib\shm.dll"**?
-  - Its an problem with latest version pytorch in Windows, Please install version `torch==2.2.1` and `torchvision==0.17.1`, here: [pytorch v2.2.1 and torchvision v0.17.1](https://pytorch.org/get-started/previous-versions/#v221)
+### Optional: GPU Acceleration
+
+For significantly better performance, you can install the GPU-enabled versions of PyTorch and PaddlePaddle. It is highly recommended to do this in a clean virtual environment.
+
+**1. Uninstall CPU Versions (if necessary):**
+If you have already installed the CPU versions, uninstall them first:
+```bash
+pip uninstall torch paddlepaddle
+```
+
+**2. Install GPU-Enabled PyTorch:**
+Visit the official [PyTorch website](https://pytorch.org/get-started/locally/) and use the command generator to find the correct installation command for your specific system (OS, package manager, and CUDA version).
+
+*Example for Windows with an NVIDIA GPU (CUDA 12.1):*
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+**3. Install GPU-Enabled PaddlePaddle:**
+```bash
+pip install paddlepaddle-gpu
+```
+
+After installing the GPU versions, the OCR engines in ComiQ will automatically use them.
 
 ## Quick Start
 
+1.  **Set your API Key:** ComiQ requires a Gemini API key. You can either pass it to the `ComiQ` constructor or set it as an environment variable named `GEMINI_API_KEY`.
+
+    You can create a `.env` file in your project's root directory:
+    ```
+    GEMINI_API_KEY="your-api-key-here"
+    ```
+
+2.  **Use the `ComiQ` class:**
+
 ```python
-import comiq
+from comiq import ComiQ
+import cv2
 
-# Set up your Gemini API key
-comiq.set_api_key("<GEMINI_API_KEY>")
+# Initialize ComiQ. It will automatically load the API key from the .env file.
+comiq = ComiQ()
 
-# Process an image
+# Process an image from a file path
 image_path = "path/to/your/comic/image.jpg"
 data = comiq.extract(image_path)
 
-# 'data' now contains a list of bounding boxes for each text bubble in the image
+# Or process an image from a numpy array
+image_array = cv2.imread(image_path)
+data_from_array = comiq.extract(image_array)
+
+# 'data' now contains a list of text bubbles with their text and locations.
+print(data)
 ```
 
 ## API Reference
 
-### `set_api_key(api_key: str)`
+### `ComiQ(api_key: str = None, model_name: str = "gemini-1.5-flash", **kwargs)`
 
-Sets the API key for the ComiQ module, which is required for using the Gemini AI model.
+Initializes the ComiQ instance.
 
-**Parameters:**
-- `api_key` (str): The API key for accessing the Gemini AI service.
-
-**Usage:**
-```python
-import comiq
-
-comiq.set_api_key("your-api-key-here")
-```
-
-**Note:**
-- You must call this function and set a valid API key before using any other ComiQ functions.
-- Keep your API key confidential and do not share it publicly.
+- **`api_key` (str, optional):** Your Gemini API key. If not provided, it will be loaded from the `GEMINI_API_KEY` environment variable.
+- **`model_name` (str, optional):** The name of the AI model to use. Defaults to `"gemini-1.5-flash"`.
+- **`**kwargs`:** Additional configuration for the OCR and AI models. See "Custom Configuration" for more details.
 
 ### `extract(image: Union[str, 'numpy.ndarray'], ocr: Union[str, List[str]] = "paddleocr")`
 
-Extracts text from the given image using specified OCR method(s) and processes it with the Gemini AI model.
+Extracts and groups text from the given comic image.
 
-**Parameters:**
-- `image` (str or numpy.ndarray): 
-  - If str: Path to the image file.
-  - If numpy.ndarray: Numpy array representation of the image.
-- `ocr` (str or list of str, optional): 
-  - OCR engine(s) to use. Default is "paddleocr".
-  - Possible values: "paddleocr", "easyocr", or a list containing both.
+- **`image` (str or numpy.ndarray):** The path to the image file or the image as a NumPy array.
+- **`ocr` (str or list, optional):** The OCR engine(s) to use. Can be `"paddleocr"`, `"easyocr"`, or a list like `["paddleocr", "easyocr"]`. Defaults to `"paddleocr"`.
 
 **Returns:**
-- dict: Processed data containing text extractions and their locations.
+- `dict`: A dictionary containing the processed data, including text bubbles, their locations, and other metadata.
 
-**Usage:**
+### `register_ocr_engine(name: str, engine: Callable)`
+Registers a new OCR engine.
+
+- **`name` (str):** The name to identify the engine.
+- **`engine` (Callable):** The function that implements the engine. See "Advanced Usage" for details.
+
+### `get_available_ocr_engines() -> List[str]`
+Returns a list of all registered OCR engine names.
+
+## Advanced Usage: Registering a Custom OCR Engine
+
+You can extend ComiQ by adding your own OCR engine. Your custom engine must be a function that adheres to the following contract:
+
+- **Input:** It must accept two arguments:
+    1.  `image` (a `numpy.ndarray` in BGR format).
+    2.  `**kwargs` (a dictionary for any configuration your engine needs).
+- **Output:** It must return a list of dictionaries, where each dictionary represents a detected text box and has two keys:
+    1.  `"text_box"`: A list of four integers `[ymin, xmin, ymax, xmax]`.
+    2.  `"text"`: The detected text as a string.
+
+**Example:**
+
+Here is how you could wrap the `pytesseract` library as a custom engine:
+
 ```python
 import comiq
-
-# Using default OCR (PaddleOCR)
-result = comiq.extract("path/to/your/comic/image.jpg")
-
-# Using a specific OCR engine
-result = comiq.extract("path/to/your/comic/image.jpg", ocr="easyocr")
-
-# Using multiple OCR engines
-result = comiq.extract("path/to/your/comic/image.jpg", ocr=["paddleocr", "easyocr"])
-
-# Using a numpy array instead of an image path
+import pytesseract
 import cv2
-image_array = cv2.imread("path/to/your/comic/image.jpg")
-result = comiq.extract(image_array)
+import numpy as np
+
+# 1. Define the custom engine function
+def pytesseract_engine(image: np.ndarray, **kwargs) -> list:
+    """
+    A custom OCR engine using pytesseract.
+    It expects a 'config' kwarg, e.g., pytesseract_engine(image, config="--psm 6")
+    """
+    # pytesseract works with RGB images
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    # Use pytesseract to get structured data
+    data = pytesseract.image_to_data(
+        rgb_image,
+        output_type=pytesseract.Output.DICT,
+        config=kwargs.get("config", "")
+    )
+    
+    results = []
+    for i in range(len(data['text'])):
+        if int(data['conf'][i]) > 60: # Filter by confidence
+            (x, y, w, h) = (data['left'][i], data['top'][i], data['width'][i], data['height'][i])
+            text = data['text'][i]
+            if text.strip():
+                results.append({
+                    "text_box": [y, x, y + h, x + w],
+                    "text": text
+                })
+    return results
+
+# 2. Register the new engine with ComiQ
+comiq.register_ocr_engine("pytesseract", pytesseract_engine)
+
+# 3. Now you can use it!
+my_comiq = comiq.ComiQ()
+tesseract_config = {"ocr": {"pytesseract": {"config": "--psm 6"}}}
+data = my_comiq.extract(
+    "path/to/image.png",
+    ocr="pytesseract",
+    **tesseract_config
+)
+
+print(comiq.get_available_ocr_engines())
+# Output: ['paddleocr', 'easyocr', 'pytesseract']
 ```
 
-**Notes:**
-- Ensure you've set the API key using `set_api_key()` before calling this function.
-- The function automatically preprocesses the image for optimal OCR performance.
-- When using multiple OCR engines, the results are combined for improved accuracy.
-- The returned dictionary contains bounding box coordinates and extracted text for each detected text region in the image.
+## Custom Configuration
 
-## Advanced Usage
-
-### Selecting OCR Engines
-
-ComiQ supports two OCR engines: PaddleOCR and EasyOCR. You can specify which engine(s) to use:
+You can pass additional configuration to the `ComiQ` constructor to customize the behavior of the OCR and AI models.
 
 ```python
-# Use a single OCR engine
-data = comiq.extract(image_path, ocr="paddleocr")
+from comiq import ComiQ
 
-# Use multiple OCR engines
-data = comiq.extract(image_path, ocr=["paddleocr", "easyocr"])
+# Custom configuration
+config = {
+    "ocr": {
+        "paddleocr": {
+            "lang": "japan", # Use Japanese language model for PaddleOCR
+        },
+        "easyocr": {
+            "reader": {"gpu": False}, # Disable GPU for EasyOCR
+        }
+    },
+    "ai": {
+        "temperature": 0.5, # Make the AI model more creative
+    }
+}
+
+comiq = ComiQ(model_name="gemini-1.5-pro", **config)
+
+data = comiq.extract("path/to/manga.jpg", ocr="paddleocr")
 ```
-
-### OCR Engine Comparison
-
-| Feature       | EasyOCR                                                | PaddleOCR                                             |
-|---------------|--------------------------------------------------------|-------------------------------------------------------|
-| Strengths     | - Detects styled text<br>- Handles directional text<br>- Accurate bounding box positioning | - Higher true positive rate<br>- Better text quality |
-| Weaknesses    | - Lower text quality<br>- Higher false positive rate   | - Struggles with styled text<br>- Limited directional text support<br>- Less accurate positioning |
 
 ## Contributing
 
-We welcome contributions to ComiQ! Please see our [Contributing Guide](CONTRIBUTING.md) for more information on how to get started.
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for more details.
 
 ## License
 
-ComiQ is released under the [MIT License](LICENSE).
-
-## Acknowledgements
-
-- [EasyOCR](https://github.com/JaidedAI/EasyOCR)
-- [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)
-- [Google Gemini](https://deepmind.google/technologies/gemini/)
-
-## Contact
-
-For questions, issues, or suggestions, please [open an issue](https://github.com/yourusername/comiq/issues) on our GitHub repository.
+ComiQ is licensed under the [MIT License](LICENSE).

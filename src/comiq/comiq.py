@@ -1,72 +1,95 @@
 import cv2
 import os
-from typing import List, Union
-from .ocr import perform_ocr
+from typing import List, Union, Dict, Any
+import numpy as np
+from dotenv import load_dotenv
+from .ocr import perform_ocr, get_available_ocr_engines
 from .ai_processing import process_with_ai
-from .preprocessing import preprocess_image
 from .utils import ai2norm, norm2ai, merge_box_groups, assign_ids_to_bounds, cv2pil
 
-os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
-
-_API_KEY = None
-
-available_ocr = ["easyocr", "paddleocr"]
+load_dotenv()
 
 
-def set_api_key(api_key: str):
-    """Set the API key for the Comiq module."""
-    global _API_KEY
-    _API_KEY = api_key
-
-
-def extract(
-        image: Union[str, "numpy.ndarray"], ocr: Union[str, List[str]] = "paddleocr"
-):
+class ComiQ:
     """
-    Extract text from the given image using specified OCR method(s) and process with AI.
-
-    Args:
-        image (str or numpy.ndarray): Path to the image file or numpy array of the image.
-        ocr (str or list): OCR method(s) to use. Can be "paddleocr", "easyocr", or a list containing both.
-
-    Returns:
-        dict: Processed data containing text extractions and their locations.
+    A class to extract text from comic images, process it, and return structured data.
     """
-    if _API_KEY is None:
-        raise ValueError("API key not set. Use comiq.set_api_key() to set the API key.")
-    # Load and preprocess the image
 
-    if isinstance(image, str):
-        image = cv2.imread(image)
-    processed_image = preprocess_image(image)
-    height, width = processed_image.shape[:2]
+    def __init__(
+        self,
+        api_key: str = None,
+        model_name: str = "gemini-1.5-flash",
+        **kwargs,
+    ):
+        """
+        Initializes the ComiQ instance.
 
-    # Perform OCR
+        Args:
+            api_key (str, optional): The API key for the AI service. If not provided,
+                                     it's sourced from the GEMINI_API_KEY environment variable.
+            model_name (str): The name of the AI model to use.
+            **kwargs: Additional configuration for AI and OCR.
+        """
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        if not self.api_key:
+            raise ValueError(
+                "API key not provided. Please pass it to the constructor or set the "
+                "GEMINI_API_KEY environment variable."
+            )
+        self.model_name = model_name
+        self.config = kwargs
 
-    if isinstance(ocr, str):
-        ocr = [ocr]
-    ocr = list(filter(lambda x: x in available_ocr, ocr))
+    def extract(
+        self,
+        image: Union[str, np.ndarray],
+        ocr: Union[str, List[str]] = "paddleocr",
+    ) -> Dict[str, Any]:
+        """
+        Extracts text from the given image using specified OCR method(s) and processes it with AI.
 
-    if len(ocr) == 0:
-        raise ValueError(
-            f"The OCR engine provided is invalid, The Available OCR engines:{available_ocr}"
+        Args:
+            image (str or numpy.ndarray): Path to the image file or a numpy array of the image.
+            ocr (str or list): The OCR method(s) to use.
+
+        Returns:
+            dict: Processed data containing text extractions and their locations.
+        """
+        # Load the image
+        if isinstance(image, str):
+            image = cv2.imread(image)
+
+        height, width = image.shape[:2]
+
+        # Perform OCR
+        if isinstance(ocr, str):
+            ocr = [ocr]
+
+        available_ocr = get_available_ocr_engines()
+        ocr_methods = [method for method in ocr if method in available_ocr]
+        if not ocr_methods:
+            raise ValueError(
+                f"Invalid OCR engine requested. Available options: {available_ocr}"
+            )
+
+        ocr_config = self.config.get("ocr", {})
+        ocr_results = perform_ocr(image, ocr_methods, **ocr_config)
+
+        # Normalize data for AI processing
+        ocr_results_ai = norm2ai(ocr_results, height, width)
+        ocr_bound_ids = assign_ids_to_bounds(ocr_results_ai)
+
+        # Process with AI
+        ai_config = self.config.get("ai", {})
+        predicted_groups = process_with_ai(
+            image=cv2pil(image),
+            ocr_results=ocr_bound_ids,
+            api_key=self.api_key,
+            model_name=self.model_name,
+            **ai_config,
         )
-    # Perform OCR on the Image
 
-    ocr_results = perform_ocr(processed_image, ocr)
+        # Merge results and convert coordinates back
+        merged_results = merge_box_groups(predicted_groups, ocr_bound_ids)
+        final_results = ai2norm(merged_results, height, width)
 
-    # Make the data AI-friendly
-
-    ocr_results = norm2ai(ocr_results, height, width)
-    ocr_bound_ids = assign_ids_to_bounds(ocr_results)
-
-    # Process data with AI into possible text groups
-
-    predicted_groups = process_with_ai(cv2pil(processed_image), ocr_bound_ids, _API_KEY)
-
-    # Merge boxes into text bubbles
-
-    results = merge_box_groups(predicted_groups, ocr_bound_ids)
-    final_results = ai2norm(results, height, width)
-
-    return final_results
+        return final_results

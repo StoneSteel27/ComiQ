@@ -5,6 +5,7 @@ __pycache__/
 # Environment specific
 .venv
 venv
+.test-venv
 .env
 env
 
