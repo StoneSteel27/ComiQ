@@ -45,7 +45,7 @@ def _detect_text_pad(image: np.ndarray, **kwargs) -> List[Dict[str, Any]]:
     paddle_config = {
         "use_angle_cls": True, "lang": "en", "det_limit_side_len": 2560,
         "det_db_thresh": 0.1, "det_db_box_thresh": 0.2, "use_space_char": True,
-        "use_gpu": True, "enable_mkldnn": True, "show_log": False,
+        "use_gpu": True, "enable_mkldnn": True,
     }
     paddle_config.update(kwargs)
     ocr = PaddleOCR(**paddle_config)
