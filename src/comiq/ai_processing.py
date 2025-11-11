@@ -19,7 +19,7 @@ def get_base64_image(image: Image) -> str:
 def process_with_ai(
     image: Image,
     ocr_results: Dict[str, List[Dict]],
-    api_key: str,
+    mllm_api_key: str,
     model_name: str,
     base_url: str,
     temperature: float = 0.0,
@@ -27,7 +27,7 @@ def process_with_ai(
     **kwargs,
 ) -> ComicAnalysis:
     """Process OCR results with AI and validate with Pydantic."""
-    client = configure_openai(api_key, base_url)
+    client = configure_openai(mllm_api_key, base_url)
     base64_image = get_base64_image(image)
     prompt = comic_prompt.format(ocr_results)
 
@@ -72,9 +72,9 @@ def process_with_ai(
             raise e
 
 
-def configure_openai(api_key: str, base_url: str) -> OpenAI:
+def configure_openai(mllm_api_key: str, base_url: str) -> OpenAI:
     """Configure and return an OpenAI client."""
     return OpenAI(
-        api_key=api_key,
+        api_key=mllm_api_key,
         base_url=base_url,
     )

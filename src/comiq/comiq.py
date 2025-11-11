@@ -32,11 +32,11 @@ class ComiQ:
             base_url (str): The base URL for the AI service.
             **kwargs: Additional configuration for AI and OCR.
         """
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.api_key = api_key or os.getenv("MLLM_API_KEY")
         if not self.api_key:
             raise ValueError(
                 "API key not provided. Please pass it to the constructor or set the "
-                "GEMINI_API_KEY environment variable."
+                "MLLM_API_KEY environment variable."
             )
         self.model_name = model_name
         self.base_url = base_url

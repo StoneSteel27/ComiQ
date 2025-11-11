@@ -51,11 +51,11 @@ After installing the GPU versions, the OCR engines in ComiQ will automatically u
 
 ## Quick Start
 
-1.  **Set your API Key:** ComiQ requires a Gemini API key. You can either pass it to the `ComiQ` constructor or set it as an environment variable named `GEMINI_API_KEY`.
+1.  **Set your API Key:** ComiQ requires an MLLM API key. You can either pass it to the `ComiQ` constructor or set it as an environment variable named `MLLM_API_KEY`.
 
     You can create a `.env` file in your project's root directory:
     ```
-    GEMINI_API_KEY="your-api-key-here"
+    MLLM_API_KEY="your-api-key-here"
     ```
 
 2.  **Use the `ComiQ` class:**
@@ -81,12 +81,12 @@ print(data)
 
 ## API Reference
 
-### `ComiQ(api_key: str = None, model_name: str = "gemini-1.5-flash", base_url: str = "https://generativelanguage.googleapis.com/v1beta/", **kwargs)`
+### `ComiQ(api_key: str = None, model_name: str = "gemini-2.5-flash", base_url: str = "https://generativelanguage.googleapis.com/v1beta/", **kwargs)`
 
 Initializes the ComiQ instance.
 
-- **`api_key` (str, optional):** Your Gemini API key. If not provided, it will be loaded from the `GEMINI_API_KEY` environment variable.
-- **`model_name` (str, optional):** The name of the AI model to use. Defaults to `"gemini-1.5-flash"`.
+- **`api_key` (str, optional):** Your MLLM API key. If not provided, it will be loaded from the `MLLM_API_KEY` environment variable.
+- **`model_name` (str, optional):** The name of the AI model to use. Defaults to `"gemini-2.5-flash"`.
 - **`base_url` (str, optional):** The base URL for the AI service. Defaults to Google's Generative AI endpoint.
 - **`**kwargs`:** Additional configuration for the OCR and AI models. See "Custom Configuration" for more details.
 
