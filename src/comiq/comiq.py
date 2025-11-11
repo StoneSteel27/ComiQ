@@ -18,7 +18,8 @@ class ComiQ:
     def __init__(
         self,
         api_key: str = None,
-        model_name: str = "gemini-1.5-flash",
+        model_name: str = "gemini-2.5-flash",
+        base_url: str = "https://generativelanguage.googleapis.com/v1beta/",
         **kwargs,
     ):
         """
@@ -28,6 +29,7 @@ class ComiQ:
             api_key (str, optional): The API key for the AI service. If not provided,
                                      it's sourced from the GEMINI_API_KEY environment variable.
             model_name (str): The name of the AI model to use.
+            base_url (str): The base URL for the AI service.
             **kwargs: Additional configuration for AI and OCR.
         """
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
@@ -37,6 +39,7 @@ class ComiQ:
                 "GEMINI_API_KEY environment variable."
             )
         self.model_name = model_name
+        self.base_url = base_url
         self.config = kwargs
 
     def extract(
@@ -85,6 +88,7 @@ class ComiQ:
             ocr_results=ocr_bound_ids,
             api_key=self.api_key,
             model_name=self.model_name,
+            base_url=self.base_url,
             **ai_config,
         )
 

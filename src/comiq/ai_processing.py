@@ -21,12 +21,13 @@ def process_with_ai(
     ocr_results: Dict[str, List[Dict]],
     api_key: str,
     model_name: str,
+    base_url: str,
     temperature: float = 0.0,
     top_p: float = 1.0,
     **kwargs,
 ) -> ComicAnalysis:
     """Process OCR results with AI and validate with Pydantic."""
-    client = configure_openai(api_key)
+    client = configure_openai(api_key, base_url)
     base64_image = get_base64_image(image)
     prompt = comic_prompt.format(ocr_results)
 
@@ -71,9 +72,9 @@ def process_with_ai(
             raise e
 
 
-def configure_openai(api_key: str) -> OpenAI:
+def configure_openai(api_key: str, base_url: str) -> OpenAI:
     """Configure and return an OpenAI client."""
     return OpenAI(
         api_key=api_key,
-        base_url="https://generativelanguage.googleapis.com/v1beta/",
+        base_url=base_url,
     )

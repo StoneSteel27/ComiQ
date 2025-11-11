@@ -81,12 +81,13 @@ print(data)
 
 ## API Reference
 
-### `ComiQ(api_key: str = None, model_name: str = "gemini-1.5-flash", **kwargs)`
+### `ComiQ(api_key: str = None, model_name: str = "gemini-1.5-flash", base_url: str = "https://generativelanguage.googleapis.com/v1beta/", **kwargs)`
 
 Initializes the ComiQ instance.
 
 - **`api_key` (str, optional):** Your Gemini API key. If not provided, it will be loaded from the `GEMINI_API_KEY` environment variable.
 - **`model_name` (str, optional):** The name of the AI model to use. Defaults to `"gemini-1.5-flash"`.
+- **`base_url` (str, optional):** The base URL for the AI service. Defaults to Google's Generative AI endpoint.
 - **`**kwargs`:** Additional configuration for the OCR and AI models. See "Custom Configuration" for more details.
 
 ### `extract(image: Union[str, 'numpy.ndarray'], ocr: Union[str, List[str]] = "paddleocr")`
@@ -195,7 +196,11 @@ config = {
     }
 }
 
-comiq = ComiQ(model_name="gemini-1.5-pro", **config)
+comiq = ComiQ(
+    model_name="gemini-2.5-flash",
+    base_url="https://your-custom-endpoint.com/v1/",
+    **config
+)
 
 data = comiq.extract("path/to/manga.jpg", ocr="paddleocr")
 ```
