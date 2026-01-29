@@ -62,8 +62,15 @@ def process_with_ai(
         try:
             parsed_json = json.loads(cleaned_text)
             if isinstance(parsed_json, list):
-                groups = [Group.model_validate(item) for item in parsed_json]
-                return ComicAnalysis(groups=groups)
+                # Check if it's a list of Group objects: [{"panel_id": ...}, ...]
+                if parsed_json and isinstance(parsed_json[0], dict) and 'panel_id' in parsed_json[0]:
+                    groups = [Group.model_validate(item) for item in parsed_json]
+                    return ComicAnalysis(groups=groups)
+                # Check if it's a list containing a ComicAnalysis-like object: [{"groups": [...]}]
+                elif parsed_json and isinstance(parsed_json[0], dict) and 'groups' in parsed_json[0]:
+                    return ComicAnalysis.model_validate(parsed_json[0])
+                else:
+                    raise e
             else:
                 # If it's not a list, the structure is unexpected.
                 raise e
