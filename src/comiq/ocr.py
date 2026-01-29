@@ -1,6 +1,23 @@
 import numpy as np
+import warnings
+import sys
 from typing import List, Dict, Any, Callable
-from paddleocr import PaddleOCR
+
+# Try importing PaddleOCR
+try:
+    from paddleocr import PaddleOCR
+    PADDLEOCR_AVAILABLE = True
+except ImportError:
+    PADDLEOCR_AVAILABLE = False
+    warnings.warn(
+        "PaddleOCR is not installed. "
+        "It will be automatically installed for Python 3.8-3.12.\n"
+        "For Python 3.13+, PaddleOCR 2.x is not available. Use EasyOCR instead:\n"
+        "  comiq.extract(image, ocr='easyocr')\n"
+        "Or register a custom PaddleOCR 3.x engine - see README for details.",
+        UserWarning
+    )
+
 import easyocr
 
 # OCR engine registry
@@ -40,16 +57,42 @@ def perform_ocr(
 
 # --- Built-in OCR Implementations ---
 
-def _detect_text_pad(image: np.ndarray, **kwargs) -> List[Dict[str, Any]]:
-    """Internal implementation for PaddleOCR, optimized for v2.x."""
+def _detect_text_paddleocr(image: np.ndarray, **kwargs) -> List[Dict[str, Any]]:
+    """Internal implementation for PaddleOCR 2.x (PP-OCRv4).
+    
+    Supports Python 3.8-3.12 only. For Python 3.13+, use EasyOCR or register
+    a custom PaddleOCR 3.x engine.
+    """
+    if not PADDLEOCR_AVAILABLE:
+        raise ImportError(
+            "PaddleOCR is not installed.\n\n"
+            "For Python 3.8-3.12, install with:\n"
+            "  pip install 'comiq[paddleocr2]'\n\n"
+            "For Python 3.13+, PaddleOCR 2.x is not available. Options:\n"
+            "  1. Use EasyOCR: comiq.extract(image, ocr='easyocr')\n"
+            "  2. Register custom PaddleOCR 3.x engine (see README)\n"
+        )
+    
+    # Check Python version at runtime
+    if sys.version_info >= (3, 13):
+        raise RuntimeError(
+            "PaddleOCR 2.x does not support Python 3.13+.\n\n"
+            "Options:\n"
+            "  1. Use EasyOCR (recommended):\n"
+            "     comiq.extract(image, ocr='easyocr')\n"
+            "  2. Downgrade to Python 3.8-3.12\n"
+            "  3. Register custom PaddleOCR 3.x engine:\n"
+            "     See README.md for custom engine registration example\n\n"
+            "Note: PaddleOCR 3.x is unstable on Windows. We recommend EasyOCR for Python 3.13+."
+        )
+    
     paddle_config = {
         "use_angle_cls": True,
         "lang": "en",
         "det_limit_side_len": 2560,
         "det_db_thresh": 0.1,
         "det_db_box_thresh": 0.2,
-        "use_space_char": True,
-        "use_gpu": True,
+        "use_gpu": False,  # Default to CPU for stability
         "enable_mkldnn": True,
         "show_log": False,
     }
@@ -71,7 +114,10 @@ def _detect_text_pad(image: np.ndarray, **kwargs) -> List[Dict[str, Any]]:
 
 
 def _detect_text_easy(image: np.ndarray, **kwargs) -> List[Dict[str, Any]]:
-    """Internal implementation for EasyOCR."""
+    """Internal implementation for EasyOCR.
+    
+    Works on all Python versions (3.8+) and supports CUDA 11.x-13.x.
+    """
     reader_config = {"gpu": True}
     readtext_config = {
         "paragraph": False, "decoder": "beamsearch", "beamWidth": 5,
@@ -95,5 +141,11 @@ def _detect_text_easy(image: np.ndarray, **kwargs) -> List[Dict[str, Any]]:
 
 
 # Register the built-in engines
-register_ocr_engine("paddleocr", _detect_text_pad)
+# "paddleocr" is the main engine (PaddleOCR 2.x)
+register_ocr_engine("paddleocr", _detect_text_paddleocr)
+
+# "paddleocr2" is an alias for explicit version control
+register_ocr_engine("paddleocr2", _detect_text_paddleocr)
+
+# Always register EasyOCR (it's a required dependency)
 register_ocr_engine("easyocr", _detect_text_easy)

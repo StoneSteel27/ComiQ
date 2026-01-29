@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Comic-Focused Hybrid OCR Python Library"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -20,6 +20,18 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/StoneSteel27/ComiQ"
 "Bug Tracker" = "https://github.com/StoneSteel27/ComiQ/issues"
+
+[project.optional-dependencies]
+# Explicit version control for power users
+paddleocr2 = [
+    "paddleocr>=2.9.0,<3.0",
+    "paddlepaddle>=2.5.0,<3.0"
+]
+# 'all' now mirrors base requirements (kept for backwards compatibility)
+all = [
+    "paddleocr>=2.9.0,<3.0; python_version < '3.13'",
+    "paddlepaddle>=2.5.0,<3.0; python_version < '3.13'"
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
