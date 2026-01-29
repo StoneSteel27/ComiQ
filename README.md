@@ -138,7 +138,29 @@ Extracts and groups text from the given comic image.
   Defaults to `"paddleocr"`.
 
 **Returns:**
-- `dict`: A dictionary containing the processed data, including text bubbles, their locations, and other metadata.
+- `List[Dict]`: A list of dictionaries, where each dictionary represents a text bubble with the following structure:
+
+```python
+[
+  {
+    'panel_id': '1',           # Panel identifier
+    'text_bubble_id': '1-1',   # Unique bubble ID (panel-sequence)
+    'text_box': [31, 25, 87, 97],  # Bounding box [ymin, xmin, ymax, xmax]
+    'text': "HE'S TOO MUCH FOR ORIHIME TO HANDLE!",  # Extracted text
+    'type': 'dialogue',        # Type: dialogue, thought, narration, sound_effect
+    'style': 'normal'          # Style: normal, emphasized, shouting, whisper
+  },
+  {
+    'panel_id': '1',
+    'text_bubble_id': '1-2',
+    'text_box': [37, 375, 79, 443],
+    'text': 'WHAT A POWERFUL KICK!!',
+    'type': 'dialogue',
+    'style': 'normal'
+  },
+  # ... more bubbles
+]
+```
 
 ### `register_ocr_engine(name: str, engine: Callable)`
 Registers a new OCR engine.
