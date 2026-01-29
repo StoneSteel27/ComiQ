@@ -86,7 +86,7 @@ class ComiQ:
         predicted_groups = process_with_ai(
             image=cv2pil(image),
             ocr_results=ocr_bound_ids,
-            api_key=self.api_key,
+            mllm_api_key=self.api_key,
             model_name=self.model_name,
             base_url=self.base_url,
             **ai_config,
