@@ -25,29 +25,48 @@ This will install the CPU-versions of the required OCR libraries. For GPU accele
 
 ### Optional: GPU Acceleration
 
-For significantly better performance, you can install the GPU-enabled versions of PyTorch and PaddlePaddle. It is highly recommended to do this in a clean virtual environment.
+For significantly better performance (10-50x faster), you can install GPU-enabled versions of the OCR engines. 
 
-**1. Uninstall CPU Versions (if necessary):**
-If you have already installed the CPU versions, uninstall them first:
+**Important:** ComiQ uses **PaddlePaddle 2.x** for stability and cross-platform compatibility. PaddlePaddle 2.x has the following CUDA requirements:
+
+**Supported CUDA Versions:**
+- CUDA 10.2, 11.2, 11.6, or **11.7** (recommended)
+- Python 3.8-3.12
+- Windows, Linux, or macOS
+
+**Installation Steps:**
+
+**1. Check Your CUDA Version:**
 ```bash
-pip uninstall torch paddlepaddle
+nvcc --version
+# or
+nvidia-smi
 ```
 
-**2. Install GPU-Enabled PyTorch:**
-Visit the official [PyTorch website](https://pytorch.org/get-started/locally/) and use the command generator to find the correct installation command for your specific system (OS, package manager, and CUDA version).
+**2. Install GPU-Enabled PaddlePaddle:**
 
-*Example for Windows with an NVIDIA GPU (CUDA 12.1):*
+For **CUDA 11.7** (recommended):
 ```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install paddlepaddle-gpu==2.6.2 -i https://www.paddlepaddle.org.cn/packages/stable/cu117/
 ```
 
-**3. Install GPU-Enabled PaddlePaddle:**
-To ensure compatibility, install a version below 3.0:
+For **CUDA 11.6**:
 ```bash
-pip install "paddlepaddle-gpu<3.0"
+pip install paddlepaddle-gpu==2.6.2 -i https://www.paddlepaddle.org.cn/packages/stable/cu116/
 ```
 
-After installing the GPU versions, the OCR engines in ComiQ will automatically use them.
+For other CUDA versions, see [PaddlePaddle Installation Guide](https://www.paddlepaddle.org.cn/install/quick).
+
+**3. Install GPU-Enabled PyTorch (for EasyOCR):**
+
+Visit [PyTorch website](https://pytorch.org/get-started/locally/) for your system-specific command.
+
+*Example for CUDA 11.8:*
+```bash
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
+
+**Note:** If you have CUDA 12.x, consider using EasyOCR (which supports newer CUDA) or downgrade CUDA to 11.7 for PaddlePaddle support. See troubleshooting section for details.
 
 ## Quick Start
 
