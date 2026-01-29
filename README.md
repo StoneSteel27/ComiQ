@@ -30,15 +30,14 @@ This automatically installs:
 ComiQ works with CPU by default, but GPU acceleration is **10-50x faster**.
 
 **EasyOCR GPU Support:**
-- Works with CUDA 11.x and 12.x out of the box
+- Requires PyTorch with CUDA support (not included by default)
 - Install PyTorch with GPU: `pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118`
+- Supports CUDA 11.x, 12.x, and 13.x
 
 **PaddleOCR 2.x GPU Support** (Python 3.8-3.12):
 - Requires: CUDA 10.2, 11.2, 11.6, **11.7** (recommended), or 12.0
 - Install: `pip install paddlepaddle-gpu==2.6.2 -i https://www.paddlepaddle.org.cn/packages/stable/cu117/`
 - ⚠️ **Python 3.13+:** PaddleOCR 2.x doesn't support Python 3.13. Use EasyOCR or register a custom PaddleOCR 3.x engine (see Custom Engine example below)
-
-See [CUDA_SUPPORT_EXPLAINED.md](CUDA_SUPPORT_EXPLAINED.md) for detailed compatibility information.
 
 ### Advanced Installation Options
 
@@ -58,13 +57,6 @@ pip install openai python-dotenv pydantic easyocr
 ```bash
 pip install --force-reinstall comiq
 ```
-
-*Example for CUDA 11.8:*
-```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-```
-
-**Note:** If you have CUDA 12.x, consider using EasyOCR (which supports newer CUDA) or downgrade CUDA to 11.7 for PaddlePaddle support. See troubleshooting section for details.
 
 ## Quick Start
 
