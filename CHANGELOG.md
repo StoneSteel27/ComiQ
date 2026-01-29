@@ -5,7 +5,15 @@ All notable changes to ComiQ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.4] - 2025-01-29 (Updated)
+## [0.1.5] - 2025-01-29
+
+### Documentation
+- Removed CUDA_SUPPORT_EXPLAINED.md (unnecessary complexity)
+- Clarified that EasyOCR GPU requires separate PyTorch installation
+- Added response schema documentation showing output structure
+- Simplified GPU setup instructions
+
+## [0.1.4] - 2025-01-29
 
 ### Fixed
 - Fixed critical bug: `mllm_api_key` parameter name mismatch in `comiq.py:89` causing `TypeError` when calling `process_with_ai()`
