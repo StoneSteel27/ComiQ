@@ -1,12 +1,17 @@
 import base64
 import io
 import json
+from typing import Any, Dict, List, Optional
+
+import instructor
 from openai import OpenAI
 from PIL import Image
-from typing import Dict, List
-from pydantic import ValidationError
+
 from .prompts import comic_prompt
-from .models import ComicAnalysis, Group
+from .models import ComicAnalysis
+
+# Cached instructor clients, keyed by (api_key, base_url, mode)
+_client_cache: Dict[tuple, instructor.Instructor] = {}
 
 
 def get_base64_image(image: Image) -> str:
@@ -14,6 +19,36 @@ def get_base64_image(image: Image) -> str:
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+
+def _resolve_mode(instructor_mode) -> instructor.Mode:
+    """Resolve an instructor mode from an enum value or string name."""
+    if instructor_mode is None:
+        return instructor.Mode.JSON
+    if isinstance(instructor_mode, instructor.Mode):
+        return instructor_mode
+    if isinstance(instructor_mode, str):
+        try:
+            return instructor.Mode[instructor_mode.upper()]
+        except KeyError:
+            valid = ", ".join(m.name for m in instructor.Mode)
+            raise ValueError(
+                f"Unknown instructor mode '{instructor_mode}'. Valid modes: {valid}"
+            )
+    raise TypeError(f"instructor_mode must be an instructor.Mode or str, got {type(instructor_mode)}")
+
+
+def _get_client(mllm_api_key: str, base_url: str, mode: instructor.Mode) -> instructor.Instructor:
+    """Return a cached instructor-patched OpenAI client."""
+    cache_key = (mllm_api_key, base_url, mode)
+    client = _client_cache.get(cache_key)
+    if client is None:
+        client = instructor.from_openai(
+            OpenAI(api_key=mllm_api_key, base_url=base_url),
+            mode=mode,
+        )
+        _client_cache[cache_key] = client
+    return client
 
 
 def process_with_ai(
@@ -24,15 +59,30 @@ def process_with_ai(
     base_url: str,
     temperature: float = 0.0,
     top_p: float = 1.0,
+    response_model: Optional[Any] = None,
+    max_retries: int = 3,
+    instructor_mode: Optional[Any] = None,
     **kwargs,
-) -> ComicAnalysis:
-    """Process OCR results with AI and validate with Pydantic."""
-    client = configure_openai(mllm_api_key, base_url)
-    base64_image = get_base64_image(image)
-    prompt = comic_prompt.format(ocr_results)
+) -> Any:
+    """Process OCR results with AI and validate with Pydantic.
 
-    response = client.chat.completions.create(
+    Uses instructor to enforce the response schema: if the model returns
+    invalid output, the validation error is fed back to the model for
+    retry (up to max_retries), which keeps even small LLMs on-schema.
+
+    response_model must have a 'groups' field whose items contain at least
+    'box_ids' and 'cleaned_text' (see ComiQ.__init__ for validation).
+    """
+    response_model = response_model or ComicAnalysis
+    mode = _resolve_mode(instructor_mode)
+    client = _get_client(mllm_api_key, base_url, mode)
+    base64_image = get_base64_image(image)
+    schema = json.dumps(response_model.model_json_schema(), indent=2)
+    prompt = comic_prompt.format(ocr_results, schema)
+
+    return client.chat.completions.create(
         model=model_name,
+        response_model=response_model,
         messages=[
             {
                 "role": "user",
@@ -45,43 +95,8 @@ def process_with_ai(
                 ],
             }
         ],
-        response_format={"type": "json_object"},
         temperature=temperature,
         top_p=top_p,
+        max_retries=max_retries,
         **kwargs,
-    )
-
-    response_text = response.choices[0].message.content
-    cleaned_text = response_text.strip().removeprefix("```json").removesuffix("```").strip()
-
-    try:
-        # First, try to validate the expected object structure: {"groups": [...]}
-        return ComicAnalysis.model_validate_json(cleaned_text)
-    except ValidationError as e:
-        # If that fails, check if the AI returned a raw list: [...]
-        try:
-            parsed_json = json.loads(cleaned_text)
-            if isinstance(parsed_json, list):
-                # Check if it's a list of Group objects: [{"panel_id": ...}, ...]
-                if parsed_json and isinstance(parsed_json[0], dict) and 'panel_id' in parsed_json[0]:
-                    groups = [Group.model_validate(item) for item in parsed_json]
-                    return ComicAnalysis(groups=groups)
-                # Check if it's a list containing a ComicAnalysis-like object: [{"groups": [...]}]
-                elif parsed_json and isinstance(parsed_json[0], dict) and 'groups' in parsed_json[0]:
-                    return ComicAnalysis.model_validate(parsed_json[0])
-                else:
-                    raise e
-            else:
-                # If it's not a list, the structure is unexpected.
-                raise e
-        except (json.JSONDecodeError, ValidationError):
-            # If it's not valid JSON or doesn't match the Group model, re-raise the original error.
-            raise e
-
-
-def configure_openai(mllm_api_key: str, base_url: str) -> OpenAI:
-    """Configure and return an OpenAI client."""
-    return OpenAI(
-        api_key=mllm_api_key,
-        base_url=base_url,
     )

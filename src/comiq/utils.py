@@ -1,8 +1,7 @@
-from typing import List, Dict
+from typing import Any, List, Dict
 import cv2
 import numpy as np
 from PIL import Image
-from .models import ComicAnalysis
 
 
 def cv2pil(image: np.ndarray) -> Image.Image:
@@ -40,9 +39,15 @@ def assign_ids_to_bounds(bounds: List[Dict]) -> List[Dict]:
 
 
 def merge_box_groups(
-    predicted_groups: ComicAnalysis, bounds_with_ids: List[Dict]
+    predicted_groups: Any, bounds_with_ids: List[Dict]
 ) -> List[Dict]:
-    """Merges OCR-detected boxes into text bubbles based on the AI's analysis."""
+    """Merges OCR-detected boxes into text bubbles based on the AI's analysis.
+
+    Works with the default ComicAnalysis model and custom response models:
+    each group's 'box_ids' are merged into one bounding box, 'cleaned_text'
+    becomes the text, and every other field of the group model (including
+    custom ones) is passed through to the output.
+    """
     id_to_bound = {bound["id"]: bound for bound in bounds_with_ids}
     merged = []
 
@@ -58,14 +63,13 @@ def merge_box_groups(
             xmin = min(box[1] for box in relevant_boxes)
             ymax = max(box[2] for box in relevant_boxes)
             xmax = max(box[3] for box in relevant_boxes)
-            merged.append(
-                {
-                    "text_box": [ymin, xmin, ymax, xmax],
-                    "text": group.cleaned_text,
-                    "panel_id": group.panel_id,
-                    "text_bubble_id": group.text_bubble_id,
-                    "type": group.type,
-                    "style": group.style,
-                }
-            )
+            entry = {
+                "text_box": [ymin, xmin, ymax, xmax],
+                "text": group.cleaned_text,
+            }
+            for name in type(group).model_fields:
+                if name in ("box_ids", "cleaned_text"):
+                    continue
+                entry[name] = getattr(group, name)
+            merged.append(entry)
     return merged

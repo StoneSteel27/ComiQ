@@ -22,15 +22,10 @@ classifiers = [
 "Bug Tracker" = "https://github.com/StoneSteel27/ComiQ/issues"
 
 [project.optional-dependencies]
-# Explicit version control for power users
-paddleocr2 = [
-    "paddleocr>=2.9.0,<3.0",
-    "paddlepaddle>=2.5.0,<3.0"
-]
-# 'all' now mirrors base requirements (kept for backwards compatibility)
+# 'all' mirrors base requirements (kept for backwards compatibility)
 all = [
-    "paddleocr>=2.9.0,<3.0; python_version < '3.13'",
-    "paddlepaddle>=2.5.0,<3.0; python_version < '3.13'"
+    "paddleocr>=3.7.0",
+    "paddlepaddle>=3.0.0,<=3.2.2"
 ]
 
 [tool.setuptools]
