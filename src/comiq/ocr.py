@@ -99,7 +99,7 @@ def _detect_text_ppocrv6(image: np.ndarray, **kwargs) -> List[Dict[str, Any]]:
             f"PP-OCRv6 requires PaddleOCR >= 3.7.0, but "
             f"{'.'.join(map(str, version))} is installed. Upgrade with:\n"
             "  pip install 'paddleocr>=3.7.0' 'paddlepaddle>=3.0.0'\n\n"
-            "Note: ComiQ 0.2.0+ dropped support for PaddleOCR 2.x."
+            "Note: ComiQ 1.0.0+ dropped support for PaddleOCR 2.x."
         )
 
     from paddleocr import PaddleOCR

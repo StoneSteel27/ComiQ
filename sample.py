@@ -3,7 +3,7 @@ import sys
 
 from comiq import ComiQ
 
-# ComiQ 0.2.0 - Sample Test
+# ComiQ 1.0.0 - Sample Test
 # Engines: paddleocr (PP-OCRv6, default), easyocr
 
 # Custom configuration for OCR engines (optional)
@@ -38,7 +38,7 @@ image_path = os.path.join(
     "examples", "images", "normal-text--normal-orientation.png",
 )
 
-print("ComiQ 0.2.0 - Sample Test")
+print("ComiQ 1.0.0 - Sample Test")
 print("=" * 50)
 print(f"Python version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
 print("=" * 50)

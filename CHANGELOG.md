@@ -5,7 +5,7 @@ All notable changes to ComiQ will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2026-08-20
+## [1.0.0] - 2026-08-20
 
 ### Added
 - PP-OCRv6 engine (SOTA, 50 languages in one model), now the default: `ocr="paddleocr"` (aliases `"paddleocr6"`, `"ppocrv6"`)
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PP-OCRv6 engine: never pass `enable_mkldnn` on GPU (breaks inference on paddlepaddle-gpu 3.3.1); default `text_det_limit_type="max"` so small images are not upscaled 6x
 
 ### Notes
-- Upgrading from 0.1.x: remove the old Paddle packages first (`pip uninstall paddlepaddle paddlepaddle-gpu`), then `pip install comiq>=0.2.0` — PaddleOCR 3.x replaces 2.x within the same environment
+- Upgrading from 0.1.x: remove the old Paddle packages first (`pip uninstall paddlepaddle paddlepaddle-gpu`), then `pip install comiq>=1.0.0` — PaddleOCR 3.x replaces 2.x within the same environment
 - Performance: OCR instances are cached per configuration; on CPU the `tier` option is the main speed dial (`small` ~3x, `tiny` ~7x faster than `medium`), while `enable_hpi=True` (High-Performance Inference) is Linux-only. `enable_mkldnn` defaults to `False` on CPU for stability; users with `paddlepaddle<=3.2.2` can opt in to `enable_mkldnn=True` for up to 3.6x speedup (0.5s tiny, 1.4s small), with a warning emitted if enabled on 3.3.x.
 - PP-OCRv6 defaults to CPU (`device="cpu"`; pass `device="gpu"` with a paddlepaddle-gpu 3.x install — Windows GPU is supported since PaddleOCR 3.2.0, incl. RTX 50 series)
 - On CPU, `enable_mkldnn` defaults to `False`: oneDNN/PIR errors (`ConvertPirAttribute2RuntimeAttribute`) still affect Paddle 3.x builds (verified on paddlepaddle 3.3.1); on GPU the flag is not passed at all (breaks inference, verified on paddlepaddle-gpu 3.3.1)
